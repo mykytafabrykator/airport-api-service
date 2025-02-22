@@ -140,10 +140,11 @@ class TicketSerializer(serializers.ModelSerializer):
 
 
 class TicketListSerializer(TicketSerializer):
-    flight = serializers.SerializerMethodField()
-
-    def get_flight(self, obj):
-        return f"{obj.flight.route.destination} -> {obj.flight.route.source}"
+    flight = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field="route.full_route"
+    )
 
 
 class TicketRetrieveSerializer(TicketSerializer):
