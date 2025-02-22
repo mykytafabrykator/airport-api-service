@@ -1,5 +1,4 @@
 from rest_framework import viewsets
-from django.db.models import F
 
 from airport.models import (
     AirplaneType,
@@ -28,6 +27,8 @@ from airport.serializers import (
     OrderRetrieveSerializer,
     FlightListSerializer,
     FlightRetrieveSerializer,
+    TicketListSerializer,
+    TicketRetrieveSerializer,
 )
 
 
@@ -108,14 +109,18 @@ class FlightViewSet(viewsets.ModelViewSet):
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.select_related("user").prefetch_related(
-        "tickets__flight__route__source",
-        "tickets__flight__route__destination",
-        "tickets__flight__airplane"
-    )
+    queryset = Order.objects.all()
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        queryset = self.queryset
+        if self.action in ("list", "retrieve"):
+            queryset = queryset.select_related("user").prefetch_related(
+                "tickets__flight__route__source",
+                "tickets__flight__route__destination",
+                "tickets__flight__airplane"
+            )
+
+        return queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -131,4 +136,23 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
-    serializer_class = TicketSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        if self.action in ("list", "retrieve"):
+            queryset = queryset.select_related(
+                "order__user",
+                "flight__route__source",
+                "flight__route__destination",
+                "flight__airplane"
+            )
+
+        return queryset.filter(order__user=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return TicketListSerializer
+        if self.action == "retrieve":
+            return TicketRetrieveSerializer
+
+        return TicketSerializer

@@ -94,15 +94,15 @@ class FlightSerializer(serializers.ModelSerializer):
 
 
 class FlightListSerializer(serializers.ModelSerializer):
-    route = serializers.StringRelatedField(
-        many=False,
-        read_only=True
-    )
-    airplane = serializers.SlugRelatedField(
-        many=False,
-        read_only=True,
-        slug_field="name"
-    )
+    route = serializers.SerializerMethodField()
+    airplane = serializers.SerializerMethodField()
+
+    def get_route(self, obj):
+        return (f"{obj.route.source.name} -> "
+                f"{obj.route.destination.name}")
+
+    def get_airplane(self, obj):
+        return obj.airplane.name
 
     class Meta:
         model = Flight
@@ -122,6 +122,8 @@ class FlightRetrieveSerializer(FlightSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
+    order = serializers.PrimaryKeyRelatedField(read_only=True, many=False)
+
     def validate(self, attrs):
         data = super(TicketSerializer, self).validate(attrs)
         Ticket.validate_ticket(
@@ -135,6 +137,17 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = ("id", "row", "seat", "flight", "order")
+
+
+class TicketListSerializer(TicketSerializer):
+    flight = serializers.SerializerMethodField()
+
+    def get_flight(self, obj):
+        return f"{obj.flight.route.destination} -> {obj.flight.route.source}"
+
+
+class TicketRetrieveSerializer(TicketSerializer):
+    flight = FlightListSerializer(many=False, read_only=True)
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -160,4 +173,4 @@ class OrderListSerializer(OrderSerializer):
 
 
 class OrderRetrieveSerializer(OrderSerializer):
-    tickets = TicketSerializer(many=True, read_only=True)
+    tickets = TicketRetrieveSerializer(many=True, read_only=True)
