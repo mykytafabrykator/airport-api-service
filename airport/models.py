@@ -127,7 +127,7 @@ class Flight(models.Model):
         )
 
     def __str__(self):
-        return (f"Flight {self.id}: {self.route.name} "
+        return (f"Flight {self.id}: {self.route.full_route} "
                 f"({self.departure_time} - {self.arrival_time})")
 
     class Meta:
