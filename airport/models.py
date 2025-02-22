@@ -63,11 +63,11 @@ class Route(models.Model):
     distance = models.PositiveIntegerField()
 
     @property
-    def name(self) -> str:
+    def full_route(self) -> str:
         return f"{self.source.name} -> {self.destination.name}"
 
     def __str__(self):
-        return self.name
+        return self.full_route
 
     class Meta:
         unique_together = ("source", "destination")
