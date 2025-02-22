@@ -86,16 +86,16 @@ class CrewViewSet(viewsets.ModelViewSet):
 
 
 class FlightViewSet(viewsets.ModelViewSet):
-    queryset = Flight.objects.select_related(
-        "airplane",
-        "route__source",
-        "route__destination"
-    )
+    queryset = Flight.objects.all()
 
     def get_queryset(self):
         queryset = self.queryset
-        if self.action == "retrieve":
-            queryset = self.queryset.prefetch_related("crew")
+        if self.action in ("list", "retrieve"):
+            queryset = self.queryset.select_related(
+                "airplane__airplane_type",
+                "route__source",
+                "route__destination",
+            ).prefetch_related("crew")
 
         return queryset
 
