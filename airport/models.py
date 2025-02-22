@@ -193,7 +193,7 @@ class Ticket(models.Model):
         )
 
     def __str__(self):
-        return (f"Ticket {self.id}: Flight {self.flight.id}, "
+        return (f"Ticket {self.id}: Flight {self.flight.route.full_route}, "
                 f"Row {self.row}, Seat {self.seat}")
 
     class Meta:
