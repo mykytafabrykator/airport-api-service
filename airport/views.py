@@ -1,5 +1,6 @@
 from rest_framework import status, mixins
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -159,6 +160,11 @@ class FlightViewSet(
         return FlightSerializer
 
 
+class OrderPagination(PageNumberPagination):
+    page_size = 10
+    max_page_size = 100
+
+
 class OrderViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -167,6 +173,7 @@ class OrderViewSet(
 ):
     queryset = Order.objects.all()
     permission_classes = (IsAuthenticated,)
+    pagination_class = OrderPagination
 
     def get_queryset(self):
         queryset = self.queryset
