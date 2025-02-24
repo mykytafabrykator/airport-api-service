@@ -1,7 +1,10 @@
 from datetime import datetime
 
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status, mixins
 from rest_framework.decorators import action
+from rest_framework.exceptions import ParseError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -91,6 +94,7 @@ class AirportViewSet(
         url_path="upload-image",
     )
     def upload_image(self, request, pk=None):
+        """Endpoint for uploading image to specific airport"""
         airport = self.get_object()
         serializer = self.get_serializer(airport, data=request.data)
 
@@ -168,14 +172,14 @@ class FlightViewSet(
                 departure_date = datetime.strptime(departure_date, "%d-%m-%Y").date()
                 queryset = queryset.filter(departure_time__date=departure_date)
             except ValueError:
-                pass
+                raise ParseError("Invalid format for departure_date. Use DD-MM-YYYY.")
 
         if arrival_date:
             try:
                 arrival_date = datetime.strptime(arrival_date, "%d-%m-%Y").date()
                 queryset = queryset.filter(arrival_time__date=arrival_date)
             except ValueError:
-                pass
+                raise ParseError("Invalid format for arrival_date. Use DD-MM-YYYY.")
 
         return queryset.distinct()
 
@@ -186,6 +190,33 @@ class FlightViewSet(
             return FlightRetrieveSerializer
 
         return FlightSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "source",
+                type=OpenApiTypes.INT,
+                description="Filter by source id (ex. ?source=1)",
+            ),
+            OpenApiParameter(
+                "destination",
+                type=OpenApiTypes.INT,
+                description="Filter by destination id (ex. ?destination=1)",
+            ),
+            OpenApiParameter(
+                "departure_date",
+                type=OpenApiTypes.DATE,
+                description="Filter by departure date (ex. ?departure_date=24-02-2022)",
+            ),
+            OpenApiParameter(
+                "arrival_date",
+                type=OpenApiTypes.DATE,
+                description="Filter by arrival date (ex. ?arrival_date=25-02-2022)",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class OrderPagination(PageNumberPagination):
