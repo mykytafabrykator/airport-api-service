@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from django.contrib.auth import get_user_model
 from airport.models import (
@@ -43,29 +44,32 @@ def sample_airplane(**params) -> Airplane:
     return Airplane.objects.create(**defaults)
 
 
-def sample_airport(**params) -> Airport:
-    """Create a sample airport"""
+def sample_airport(name=None, closest_big_city=None, **params) -> Airport:
+    """Create and return an airport with unique parameters"""
     defaults = {
-        "name": "Amsterdam Schiphol Airport",
-        "closest_big_city": "Amsterdam"
+        "name": name if name else f"Airport {uuid.uuid4()}",
+        "closest_big_city": closest_big_city
+        if closest_big_city else f"City {uuid.uuid4()}",
     }
     defaults.update(params)
-
     return Airport.objects.create(**defaults)
 
 
-def sample_route(**params) -> Route:
-    """Create a sample route"""
-    defaults = {
-        "source": sample_airport(),
-        "destination": sample_airport(
-            name="Boryspil International Airport",
-            closest_big_city="Kyiv"
-        ),
-        "distance": 1111
-    }
-    defaults.update(params)
+def sample_route(source=None, destination=None, **params) -> Route:
+    """Create and return a route"""
+    if not source:
+        source = sample_airport(
+            name="JFK Airport",
+            closest_big_city="New York"
+        )
+    if not destination:
+        destination = sample_airport(
+            name="LAX Airport",
+            closest_big_city="Los Angeles"
+        )
 
+    defaults = {"source": source, "destination": destination, "distance": 1000}
+    defaults.update(params)
     return Route.objects.create(**defaults)
 
 
@@ -80,16 +84,35 @@ def sample_crew(**params) -> Crew:
     return Crew.objects.create(**defaults)
 
 
-def sample_flight(**params) -> Flight:
-    """Create a sample flight"""
+def sample_flight(route=None, airplane=None, **params) -> Flight:
+    """Create and return a flight"""
+    if not route:
+        route = sample_route(
+            source=sample_airport(
+                name="DXB Airport",
+                closest_big_city="Dubai"
+            ),
+            destination=sample_airport(
+                name="CDG Airport",
+                closest_big_city="Paris"
+            ),
+        )
+    if not airplane:
+        airplane = sample_airplane(name="Boeing 777X")
+
     defaults = {
-        "route": sample_route(),
-        "airplane": sample_airplane(),
-        "departure_time": datetime.strptime("24-02-2025", "%d-%m-%Y"),
-        "arrival_time": datetime.strptime("25-02-2025", "%d-%m-%Y"),
+        "route": route,
+        "airplane": airplane,
+        "departure_time": datetime.strptime(
+            "2025-02-24 14:30:00",
+            "%Y-%m-%d %H:%M:%S"
+        ),
+        "arrival_time": datetime.strptime(
+            "2025-02-25 06:45:00",
+            "%Y-%m-%d %H:%M:%S"
+        ),
     }
     defaults.update(params)
-
     return Flight.objects.create(**defaults)
 
 
