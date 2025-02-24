@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import status, mixins
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -145,6 +147,8 @@ class FlightViewSet(
 
         source_id = self.request.query_params.get("source")
         destination_id = self.request.query_params.get("destination")
+        departure_date = self.request.query_params.get("departure_date")
+        arrival_date = self.request.query_params.get("arrival_date")
 
         if self.action in ("list", "retrieve"):
             queryset = self.queryset.select_related(
@@ -158,6 +162,20 @@ class FlightViewSet(
 
         if destination_id:
             queryset = queryset.filter(route__destination_id=destination_id)
+
+        if departure_date:
+            try:
+                departure_date = datetime.strptime(departure_date, "%d-%m-%Y").date()
+                queryset = queryset.filter(departure_time__date=departure_date)
+            except ValueError:
+                pass
+
+        if arrival_date:
+            try:
+                arrival_date = datetime.strptime(arrival_date, "%d-%m-%Y").date()
+                queryset = queryset.filter(arrival_time__date=arrival_date)
+            except ValueError:
+                pass
 
         return queryset.distinct()
 
