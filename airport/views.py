@@ -142,6 +142,10 @@ class FlightViewSet(
 
     def get_queryset(self):
         queryset = self.queryset
+
+        source_id = self.request.query_params.get("source")
+        destination_id = self.request.query_params.get("destination")
+
         if self.action in ("list", "retrieve"):
             queryset = self.queryset.select_related(
                 "airplane__airplane_type",
@@ -149,7 +153,13 @@ class FlightViewSet(
                 "route__destination",
             ).prefetch_related("crew", "tickets")
 
-        return queryset
+        if source_id:
+            queryset = queryset.filter(route__source_id=source_id)
+
+        if destination_id:
+            queryset = queryset.filter(route__destination_id=destination_id)
+
+        return queryset.distinct()
 
     def get_serializer_class(self):
         if self.action == "list":
