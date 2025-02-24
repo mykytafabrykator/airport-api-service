@@ -169,17 +169,27 @@ class FlightViewSet(
 
         if departure_date:
             try:
-                departure_date = datetime.strptime(departure_date, "%d-%m-%Y").date()
+                departure_date = (
+                    datetime.strptime(departure_date, "%d-%m-%Y")
+                    .date()
+                )
                 queryset = queryset.filter(departure_time__date=departure_date)
             except ValueError:
-                raise ParseError("Invalid format for departure_date. Use DD-MM-YYYY.")
+                raise ParseError(
+                    "Invalid format for departure_date. Use DD-MM-YYYY."
+                )
 
         if arrival_date:
             try:
-                arrival_date = datetime.strptime(arrival_date, "%d-%m-%Y").date()
+                arrival_date = (
+                    datetime.strptime(arrival_date, "%d-%m-%Y")
+                    .date()
+                )
                 queryset = queryset.filter(arrival_time__date=arrival_date)
             except ValueError:
-                raise ParseError("Invalid format for arrival_date. Use DD-MM-YYYY.")
+                raise ParseError(
+                    "Invalid format for arrival_date. Use DD-MM-YYYY."
+                )
 
         return queryset.distinct()
 
@@ -206,12 +216,14 @@ class FlightViewSet(
             OpenApiParameter(
                 "departure_date",
                 type=OpenApiTypes.DATE,
-                description="Filter by departure date (ex. ?departure_date=24-02-2022)",
+                description="Filter by departure date "
+                            "(ex. ?departure_date=24-02-2022)",
             ),
             OpenApiParameter(
                 "arrival_date",
                 type=OpenApiTypes.DATE,
-                description="Filter by arrival date (ex. ?arrival_date=25-02-2022)",
+                description="Filter by arrival date "
+                            "(ex. ?arrival_date=25-02-2022)",
             ),
         ]
     )
