@@ -1,5 +1,8 @@
+import pathlib
+import uuid
 from django.conf import settings
 from django.db import models
+from django.utils.text import slugify
 from rest_framework.exceptions import ValidationError
 
 
@@ -34,9 +37,16 @@ class Airplane(models.Model):
         ordering = ["name"]
 
 
+def airport_image_path(instance: "Airport", filename: str) -> pathlib.Path:
+    filename = (f"{slugify(instance.closest_big_city)}-{uuid.uuid4()}"
+                + pathlib.Path(filename).suffix)
+    return pathlib.Path(f"upload/airports/") / pathlib.Path(filename)
+
+
 class Airport(models.Model):
     name = models.CharField(max_length=100, unique=True)
     closest_big_city = models.CharField(max_length=100, unique=True)
+    image = models.ImageField(null=True, upload_to=airport_image_path)
 
     @property
     def full_name(self) -> str:
