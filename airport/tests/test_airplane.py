@@ -5,7 +5,11 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from airport.models import Airplane
-from airport.serializers import AirplaneListSerializer, AirplaneSerializer
+from airport.serializers import (
+    AirplaneListSerializer,
+    AirplaneRetrieveSerializer,
+    AirplaneSerializer,
+)
 from airport.tests.base_functions import (
     sample_airplane,
     sample_airplane_type,
@@ -13,6 +17,11 @@ from airport.tests.base_functions import (
 )
 
 AIRPLANE_URL = reverse("airport:airplane-list")
+
+
+def airplane_detail_url(airplane_id):
+    """Return the airplane detail URL"""
+    return reverse("airport:airplane-detail", args=[airplane_id])
 
 
 class UnauthenticatedAirplaneTests(TestCase):
@@ -46,13 +55,24 @@ class AuthenticatedAirplaneTests(TestCase):
         self.assertEqual(result.status_code, status.HTTP_200_OK)
         self.assertEqual(result.data, serializer.data)
 
+    def test_airplane_retrieve(self):
+        """Test retrieving a single airplane"""
+        airplane = sample_airplane()
+        url = airplane_detail_url(airplane.id)
+
+        result = self.client.get(url)
+        serializer = AirplaneRetrieveSerializer(airplane)
+
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        self.assertEqual(result.data, serializer.data)
+
     def test_create_airplane_forbidden(self):
         """Test that non-admin users cannot create an airplane"""
         payload = {
             "name": "Airbus A321XLR",
             "rows": 35,
             "seats_in_row": 6,
-            "airplane_type": sample_airplane_type().id,  # Виправлено
+            "airplane_type": sample_airplane_type().id,
         }
 
         result = self.client.post(AIRPLANE_URL, payload)
@@ -78,7 +98,7 @@ class AdminAirplaneTests(TestCase):
             "name": "Airbus A321XLR",
             "rows": 35,
             "seats_in_row": 6,
-            "airplane_type": airplane_type.id,  # Виправлено
+            "airplane_type": airplane_type.id,
         }
 
         res = self.client.post(AIRPLANE_URL, payload)
