@@ -40,7 +40,7 @@ class Airplane(models.Model):
 def airport_image_path(instance: "Airport", filename: str) -> pathlib.Path:
     filename = (f"{slugify(instance.closest_big_city)}-{uuid.uuid4()}"
                 + pathlib.Path(filename).suffix)
-    return pathlib.Path(f"upload/airports/") / pathlib.Path(filename)
+    return pathlib.Path("upload/airports/") / pathlib.Path(filename)
 
 
 class Airport(models.Model):

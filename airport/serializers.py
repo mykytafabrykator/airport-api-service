@@ -50,6 +50,12 @@ class AirportSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "closest_big_city", "full_name")
 
 
+class AirportImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Airport
+        fields = ("id", "image")
+
+
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
