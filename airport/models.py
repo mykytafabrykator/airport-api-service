@@ -45,7 +45,7 @@ def airport_image_path(instance: "Airport", filename: str) -> pathlib.Path:
 
 class Airport(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    closest_big_city = models.CharField(max_length=100, unique=True)
+    closest_big_city = models.CharField(max_length=100)
     image = models.ImageField(null=True, upload_to=airport_image_path)
 
     @property
@@ -57,6 +57,7 @@ class Airport(models.Model):
 
     class Meta:
         ordering = ["name"]
+        unique_together = ("name", "closest_big_city")
 
 
 class Route(models.Model):
