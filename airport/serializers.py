@@ -45,9 +45,11 @@ class AirplaneRetrieveSerializer(AirplaneSerializer):
 
 
 class AirportSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(read_only=True)
+
     class Meta:
         model = Airport
-        fields = ("id", "name", "closest_big_city", "full_name")
+        fields = ("id", "name", "closest_big_city", "full_name", "image")
 
 
 class AirportImageSerializer(serializers.ModelSerializer):
