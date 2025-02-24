@@ -127,6 +127,23 @@ class FlightRetrieveSerializer(FlightSerializer):
     route = RouteListSerializer(many=False, read_only=True)
     crew = CrewSerializer(many=True, read_only=True)
     airplane = AirplaneListSerializer(many=False, read_only=True)
+    taken_seats = serializers.SerializerMethodField()
+
+    def get_taken_seats(self, obj):
+        tickets = obj.tickets.values_list("row", "seat")
+        return [{"Row": row, "Seat": seat} for row, seat in tickets]
+
+    class Meta:
+        model = Flight
+        fields = (
+            "id",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "crew",
+            "taken_seats"
+        )
 
 
 class TicketSerializer(serializers.ModelSerializer):

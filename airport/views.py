@@ -116,7 +116,7 @@ class FlightViewSet(viewsets.ModelViewSet):
                 "airplane__airplane_type",
                 "route__source",
                 "route__destination",
-            ).prefetch_related("crew")
+            ).prefetch_related("crew", "tickets")
 
         return queryset
 
