@@ -14,9 +14,9 @@ from airport.models import (
 
 
 def sample_user(**params):
-    """Create a sample user"""
+    """Create and return a sample user with a unique email."""
     defaults = {
-        "email": "test@test.test",
+        "email": f"test_{uuid.uuid4().hex[:6]}@test.com",
         "password": "testpassword",
     }
     defaults.update(params)
@@ -120,7 +120,7 @@ def sample_order(**params) -> Order:
     """Create a sample order"""
     defaults = {
         "created_at": datetime.now(),
-        "user": sample_user(email="test2@test.test"),
+        "user": sample_user(),
     }
     defaults.update(params)
 
