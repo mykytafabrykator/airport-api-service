@@ -1,6 +1,8 @@
-from rest_framework import viewsets, status
+from rest_framework import status, mixins
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 from airport.models import (
     AirplaneType,
@@ -35,12 +37,21 @@ from airport.serializers import (
 )
 
 
-class AirplaneTypeViewSet(viewsets.ModelViewSet):
+class AirplaneTypeViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer
 
 
-class AirplaneViewSet(viewsets.ModelViewSet):
+class AirplaneViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet,
+):
     queryset = Airplane.objects.all()
 
     def get_queryset(self):
@@ -59,7 +70,11 @@ class AirplaneViewSet(viewsets.ModelViewSet):
         return AirplaneSerializer
 
 
-class AirportViewSet(viewsets.ModelViewSet):
+class AirportViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
     queryset = Airport.objects.all()
 
     def get_serializer_class(self):
@@ -83,7 +98,12 @@ class AirportViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RouteViewSet(viewsets.ModelViewSet):
+class RouteViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet,
+):
     queryset = Route.objects.all()
 
     def get_queryset(self):
@@ -102,12 +122,21 @@ class RouteViewSet(viewsets.ModelViewSet):
         return RouteSerializer
 
 
-class CrewViewSet(viewsets.ModelViewSet):
+class CrewViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
 
 
-class FlightViewSet(viewsets.ModelViewSet):
+class FlightViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet,
+):
     queryset = Flight.objects.all()
 
     def get_queryset(self):
@@ -130,8 +159,14 @@ class FlightViewSet(viewsets.ModelViewSet):
         return FlightSerializer
 
 
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet,
+):
     queryset = Order.objects.all()
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         queryset = self.queryset
@@ -156,7 +191,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         return OrderSerializer
 
 
-class TicketViewSet(viewsets.ModelViewSet):
+class TicketViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet,
+):
     queryset = Ticket.objects.all()
 
     def get_queryset(self):
